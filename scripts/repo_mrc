@@ -1,0 +1,11 @@
+#!/bin/bash
+if [ `arch` = 'i686' ]; then
+echo "dla arch. 32 bitowej"
+urpmi.addmedia MRC --wget --distrib http://packages.mageialinux.ru/mageia4/RPMS/i586/
+elif [ `arch` = 'x86_64' ]; then
+echo "dla arch. 64 bitowej"
+urpmi.addmedia MRC --wget --distrib http://packages.mageialinux.ru/mageia4/RPMS/x86_64/
+else
+  echo "Nie wiem jaka architektura"
+  exit 0
+fi

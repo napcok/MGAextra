@@ -1,0 +1,20 @@
+Autor: napcok <napcok@gmail.com>
+Name: MGAextra
+www: http://www.mageia.org.pl
+Copyright: 2011-2013 Mageia.Org.PL
+License: GPL-2+
+ This program is free software; you can redistribute it and/or modify it
+ under the terms of the GNU General Public License as published by the Free
+ Software Foundation; either version 2 of the License, or (at your option)
+ any later version.
+ .
+ This program is distributed in the hope that it will be useful, but WITHOUT
+ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+ more details.
+
+On Debian GNU/Linux systems, the full text of the GNU General Public License
+can be found in the file /usr/share/common-licenses/GPL-2.
+
+based on Eve Install,
+http://apticon.wordpress.com/

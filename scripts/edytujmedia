@@ -1,0 +1,8 @@
+#!/bin/bash
+
+echo "Dodawaj, usuwaj, włączaj i wyłączaj repozytoria"
+
+drakrpm-edit-media --expert
+
+sleep 1
+

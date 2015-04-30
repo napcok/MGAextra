@@ -1,0 +1,11 @@
+#!/bin/bash
+if [ `arch` = 'i686' ]; then
+echo "dla arch. 32 bitowej"
+urpmi.addmedia "Pipelight 32-bit" --wget --distrib  http://repos.fds-team.de/stable/mageia/4/i586/
+elif [ `arch` = 'x86_64' ]; then
+echo "dla arch. 64 bitowej"
+urpmi.addmedia "Pipelight 64-bit" --wget --distrib  http://repos.fds-team.de/stable/mageia/4/x86_64/
+else
+  echo "Nie wiem jaka architektura"
+  exit 0
+fi

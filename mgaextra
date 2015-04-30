@@ -1,0 +1,10 @@
+#!/bin/bash
+who_run=`whoami`
+cd /usr/share/mgaextra/
+python ./splash.py
+if [ "$who_run" == "root" ]
+then
+  ./skrypt
+else
+  zenity --entry --title="Enter root password" --text "Proszę podać hasło roota" --hide-text | su - -c "cd /usr/share/mgaextra/ && /usr/share/mgaextra/skrypt"
+fi

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=MGAextra
+Exec=/usr/bin/mgaextra
+Icon=/usr/share/mgaextra/images/mopl.png
+Terminal=false
+Type=Application
+#X-KDE-SubstituteUID=true
+#X-KDE-Username=root
+Categories=Utility;X-MandrivaLinux-CrossDesktop;
+Comment=Mageia initial configuration helper script
+Comment[pl]=Skrypt wstępnej konfiguracji Mageia

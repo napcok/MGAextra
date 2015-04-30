@@ -1,0 +1,274 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+# Author: Roy Alayn <apticons@gmail.com>
+# 
+# Copyright: 2009 Proyect Apticons
+# License: GPL-2+
+#  This program is free software; you can redistribute it and/or modify it
+#  under the terms of the GNU General Public License as published by the Free
+#  Software Foundation; either version 2 of the License, or (at your option)
+#  any later version.
+# 
+#  This program is distributed in the hope that it will be useful, but WITHOUT
+#  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#  FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License for
+#  more details.
+# 
+# On Debian GNU/Linux systems, the full text of the GNU General Public License
+# can be found in the file /usr/share/common-licenses/GPL-2.
+
+import gtk
+import gtk.glade
+import pygtk
+import ConfigParser
+import os.path
+import sys
+
+iconLogo = 'images/mopl_logo.png'
+iconLogo2 = 'images/mopl_logo.png'
+copyrightFile = 'copyright'
+
+try:
+  import vte
+except:
+  # python-vte was not found. How's it possible? Synaptic itself depends on it
+  import sys
+  diag = gtk.MessageDialog(None, gtk.DIALOG_MODAL, gtk.MESSAGE_ERROR, 
+    gtk.BUTTONS_YES_NO, 'To run this program '
+    'python-vte is needed\n'
+    'Do you wish to install it now?\n\n'
+    'You must restart the program at the end of the update')
+  diag.set_icon_from_file(iconLogo2)
+  if diag.run() == gtk.RESPONSE_YES:
+    # The user asked to install the python-vte packages through apturl
+    import subprocess
+    proc = subprocess.Popen(['apturl', 'apt:python-vte'])
+  diag.destroy()
+  sys.exit(1)
+
+def on_child_exited(widget, data=None):
+  "Uruchamianie następnej komendy"
+  global intCurrentCommand
+  intCurrentCommand += 1
+  progInstall.set_fraction((intCurrentCommand + 1.0) / (len(commands) + 1))
+  if intCurrentCommand < len(commands):
+    # Replace \_ with space
+    cmds = [c.replace('\_', ' ') for c in commands[intCurrentCommand].split()]
+    # Execute command
+    vterminal.fork_command(cmds[0], cmds)
+  else:
+    # Operations completed
+    diag = gtk.MessageDialog(None, gtk.DIALOG_MODAL, gtk.MESSAGE_INFO,
+      gtk.BUTTONS_OK, config.get('General', 'completed'))
+    diag.set_icon_from_file(iconLogo)
+    diag.run()
+    diag.destroy()
+    winInstall.hide()
+    # Reload categories and programs
+    __loadCategories()
+
+def on_winMain_delete_event(widget, data=None):
+  "Close the main Window and gtk main loop"
+  winInstall.destroy()
+  gtk.main_quit()
+  return 0
+
+def on_btnCategoriesInfo_clicked(widget):
+  about = gtk.AboutDialog()
+  about.set_name('MGAextra')
+  about.set_icon_from_file(iconLogo)
+  about.set_logo(gtk.gdk.pixbuf_new_from_file(iconLogo))
+  about.set_copyright('Copyright 2011-2015 Mageia.Org.PL ')
+  about.set_license(open(copyrightFile).read())
+  about.set_website_label('Mageia.Org.PL')
+  gtk.about_dialog_set_url_hook(lambda url, data=None: url)
+  about.set_website('http://www.mageia.org.pl')
+  about.set_authors(['Przygotowali: napcok oraz m123456',
+    'http://mageia.org.pl/', 'na podstawie Eve Install Roya Alayna','\n','Podziękowania dla dzonsona za udostępnienie logo', 'oraz użytkowników forum Mageia.Org.PL'])
+  about.set_version('5.0rc')
+  about.run()
+  about.destroy()
+
+def on_tvwCategories_cursor_changed(widget):
+  "Show features of the selected category"
+  selectedIndex = tvwCategories.get_selection().get_selected_rows()[1]
+  if len(selectedIndex) > 0:
+    # Index of selected item
+    selectedIndex = int(selectedIndex[0][0])
+    for item in modelFeatures:
+      # Make visible only items of the same category
+      item[COL_VISIBLE] = item[COL_CATEGORY] == selectedIndex + 1
+
+def on_selected_toggle(renderer, path, data=None):
+  "Select or deselect an item"
+  path = filterFeatures.convert_path_to_child_path(path)
+  modelFeatures[path][COL_ACTIVE] = not modelFeatures[path][COL_ACTIVE]
+
+def on_btnApply_clicked(widget):
+  "Uruchamianie komendy"
+  global commands
+  global vterminal
+  global intCurrentCommand
+  install_cmd = config.get('General', 'package install')
+  remove_cmd = config.get('General', 'package remove')
+
+  commands = []
+  for item in modelFeatures:
+    if item[COL_ACTIVE] != item[COL_EXISTS]:
+      if item[COL_EXISTS]:  # App exists, then uninstall
+        strCommand = 'uninstall%d cmd' % item[COL_INDEX]
+      else:                 # App doesn't exist, then install
+        strCommand = 'install%d cmd' % item[COL_INDEX]
+      # Look for subcommands for each activity (install/uninstall)
+      command = 1
+      strCategory = 'Category%d' % item[COL_CATEGORY]
+      while config.has_option(strCategory, '%s%d' % (strCommand, command)):
+        commands.append(
+          config.get(strCategory, '%s%d' % (strCommand, command)).replace(
+          '{package}', item[COL_EXISTS] and remove_cmd or install_cmd))
+        command += 1
+  if len(commands) > 0:
+    intCurrentCommand = -1
+    if not vterminal:
+      vterminal = vte.Terminal()
+      vterminal.connect('child-exited', on_child_exited)
+      expInstall.add(vterminal)
+    winInstall.show_all()
+    on_child_exited(None)
+
+
+def __loadCategories():
+  "Load categories from the config file"
+  modelCategories.clear()
+  modelFeatures.clear()
+  category = 1
+  while config.has_option('Categories', 'category%d' % category):
+    strCategory = 'Category%d' % category
+    modelCategories.append([
+      gtk.gdk.pixbuf_new_from_file(config.get('Categories', 'icon%d' % category)),
+      config.get('Categories', strCategory)])
+    control = 1
+    while config.has_option(strCategory, 'application%d' % control):
+      newControl = config.get(strCategory, 'application%d' % control)
+      exists = os.path.exists(config.get(strCategory, 'check%d' % control))
+      modelFeatures.append(None, [
+        category, # Category
+        control,  # Index
+        exists, # Exists
+        exists, # Selected
+        False, # Visible
+        newControl.replace('\\n', '\n'), # App title
+        config.has_option(strCategory, 'icon%d' % control) and # App icon
+          gtk.gdk.pixbuf_new_from_file_at_size(
+          config.get(strCategory, 'icon%d' % control), iconWidth, iconHeight) or
+          None,
+        exists and icon_YES or icon_NO # Installed icon
+      ])
+      control += 1
+    category += 1
+
+def __createColumns():
+  "Create columns for the features treeview"
+  import pango
+  # Columns for categories
+  cell = gtk.CellRendererPixbuf()
+  if os.environ['LANG'] == 'pl_PL.UTF-8':
+    column = gtk.TreeViewColumn('Kategorie')
+  else:
+     column = gtk.TreeViewColumn('Categories') 
+  column.pack_start(cell)
+  column.set_attributes(cell, pixbuf=0)
+
+  cell = gtk.CellRendererText()
+  column.pack_start(cell, True)
+  column.set_attributes(cell, text=1)
+  tvwCategories.append_column(column)
+  # Column for active
+  cell = gtk.CellRendererToggle()
+  cell.connect('toggled', on_selected_toggle)
+  column = gtk.TreeViewColumn('')
+  column.pack_start(cell)
+  column.set_attributes(cell, active=COL_ACTIVE)
+  tvwFeatures.append_column(column)
+  # Column for image + text
+  cell = gtk.CellRendererPixbuf()
+  if os.environ['LANG'] == 'pl_PL.UTF-8':
+    column = gtk.TreeViewColumn('Aplikacje')
+  else: 
+    column = gtk.TreeViewColumn('Applications')
+  column.pack_start(cell, False)
+  column.set_attributes(cell, pixbuf=COL_ICON)
+  column.set_spacing(10)
+  cell = gtk.CellRendererText()
+  cell.set_property('ellipsize', pango.ELLIPSIZE_END)
+  # column.set_sizing(gtk.TREE_VIEW_COLUMN_AUTOSIZE) # Column autosize to shrink
+  column.pack_start(cell)
+  column.set_attributes(cell, markup=COL_TEXT)
+  
+  cell = gtk.CellRendererPixbuf()
+  column.pack_end(cell, False)
+  column.set_attributes(cell, pixbuf=COL_INSTALLED)
+  tvwFeatures.append_column(column)
+  
+# Signals handler
+signals = {
+  'on_winMain_delete_event': on_winMain_delete_event,
+  'on_btnCategoriesInfo_clicked': on_btnCategoriesInfo_clicked,
+  'on_tvwCategories_cursor_changed': on_tvwCategories_cursor_changed,
+  'on_btnApply_clicked': on_btnApply_clicked
+}
+
+gladeFile = gtk.glade.XML(fname='skrypt.glade')
+gladeFile.signal_autoconnect(signals)
+gw = gladeFile.get_widget
+# Main window
+winMain = gw('winMain')
+tvwCategories = gw('tvwCategories')
+tvwFeatures = gw('tvwFeatures')
+# Install window
+winInstall = gw('winInstall')
+progInstall = gw('progInstall')
+expInstall = gw('expInstall')
+
+# Load settings
+if os.getuid() != 0:
+    os.system("zenity --warning --window-icon='Images/eva.png' --text='Musisz mieć uprawnienia administratora, aby uruchomić tą aplikację!'")
+    sys.exit(1)
+os.system("bash scripts/Check") # Check for necessary tweaks
+config = ConfigParser.RawConfigParser()
+if os.environ['LANG'] == 'pl_PL.UTF-8':
+  config.read('categories.ini')
+else:
+  config.read('categories_en.ini')
+iconHeight = int(config.get('General', 'icon height'))
+iconWidth = int(config.get('General', 'icon width'))
+icon_YES = winMain.render_icon(gtk.STOCK_YES, gtk.ICON_SIZE_BUTTON)
+icon_NO = winMain.render_icon(gtk.STOCK_NO, gtk.ICON_SIZE_BUTTON)
+
+# Model for categories (icon, name)
+modelCategories = gtk.ListStore(gtk.gdk.Pixbuf, str)
+tvwCategories.set_model(modelCategories)
+
+# Columns and model for features (exists, active, text, images, installed, category, visible)
+modelFeatures = gtk.TreeStore(int, int, bool, bool, bool, str, gtk.gdk.Pixbuf, gtk.gdk.Pixbuf)
+COL_CATEGORY, COL_INDEX, COL_EXISTS, COL_ACTIVE, COL_VISIBLE, COL_TEXT, COL_ICON, COL_INSTALLED = range(8)
+filterFeatures = modelFeatures.filter_new(root=None)
+filterFeatures.set_visible_column(COL_VISIBLE)
+tvwFeatures.set_model(filterFeatures)
+__loadCategories()
+__createColumns()
+
+# Variables for install
+vterminal = None
+commands = []
+
+winMain.set_default_size(
+  int(config.get('General', 'default width')),
+  int(config.get('General', 'default height')))
+winMain.set_icon_from_file(iconLogo)
+winInstall.set_icon_from_file(iconLogo)
+
+
+winMain.show()
+gtk.main()

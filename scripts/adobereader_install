@@ -1,0 +1,17 @@
+#!/bin/bash
+version=9.5.4
+adobereader_v=AdbeRdr${version}-1_i486linux_enu.bin
+if [ `arch` = 'i686' ]; then
+  urpmi libxml2_2 libgdk_pixbuf2.0_0 libgtk+-x11-2.0_0
+elif [ `arch` = 'x86_64' ]; then
+  #urpmi lib64xml2_2 lib64gdk_pixbuf2.0_0 lib64gtk+-x11-2.0_0
+  urpmi --ignorearch libxml2_2 libgdk_pixbuf2.0_0 libgtk+-x11-2.0_0
+else
+  echo "Architektura systemu nie została rozpoznana."
+  exit 0
+fi
+
+cd /tmp
+wget ftp://ftp.adobe.com/pub/adobe/reader/unix/9.x/$version/enu/$adobereader_v
+chmod +x $adobereader_v
+./$adobereader_v --install_path=/opt

@@ -1,0 +1,14 @@
+#!/bin/bash
+echo 'Podaj nazwę użytkownika który ma mieć prawo wykonywania sudo:'
+read LOGINNAME
+echo "Czy chcesz korzystać z sudo bez podawania hasła (t/n)?"
+read PASS_SUDO_LOG
+if [ $PASS_SUDO_LOG = 't' ]; then
+    echo "$LOGINNAME ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+elif [ $PASS_SUDO_LOG = 'n' ]; then
+    echo "$LOGINNAME ALL=(ALL) PASSWD:ALL" >> /etc/sudoers
+else
+  echo "Sudo nie zostało skonfigurowane!"
+  echo "Następnym razem wybierz t (tak) lub n (nie)."
+  echo "Bye bye!"
+fi

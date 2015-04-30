@@ -1,0 +1,13 @@
+#!/bin/bash
+if [ `arch` = 'i686' ]; then
+    urpmi.addmedia Google http://dl.google.com/linux/rpm/stable/i386
+    urpmi.addmedia "Google Chrome" http://dl.google.com/linux/chrome/rpm/stable/i386
+    urpmi.addmedia "Google Earth" http://dl.google.com/linux/earth/rpm/stable/i386
+  elif [ `arch` = 'x86_64' ]; then
+    urpmi.addmedia Google http://dl.google.com/linux/rpm/stable/x86_64
+    urpmi.addmedia "Google Chrome" http://dl.google.com/linux/chrome/rpm/stable/x86_64
+    urpmi.addmedia "Google Earth" http://dl.google.com/linux/earth/rpm/stable/x86_64
+  else
+    echo "Nie wiem jaka architektura"
+    exit 0
+fi

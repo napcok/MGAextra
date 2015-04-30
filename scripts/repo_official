@@ -1,0 +1,26 @@
+#!/bin/bash
+link_url='ftp://fr2.rpmfind.net/linux/mageia/distrib/4'
+if [ `arch` = 'i686' ]; then
+echo "dla arch. 32 bit..."
+    urpmi.addmedia 'Core32' $link_url/i586/media/core/release
+    urpmi.addmedia --update 'Core32-updates' $link_url/i586/media/core/updates
+    urpmi.addmedia 'Nonfree32' $link_url/i586/media/nonfree/release
+    urpmi.addmedia --update 'Nonfree32-updates' $link_url/i586/media/nonfree/updates
+    urpmi.addmedia 'Tainted32' $link_url/i586/media/tainted/release
+    urpmi.addmedia --update 'Tainted32-updates' $link_url/i586/media/tainted/updates
+#urpmi.addmedia  --distrib --mirrorlist http://mirrors.mageia.org/api/mageia.1.i586.list
+elif [ `arch` = 'x86_64' ]; then
+echo "dla arch. 64 bit..."
+    urpmi.addmedia 'Core' $link_url/x86_64/media/core/release
+    urpmi.addmedia --update 'Core-updates' $link_url/x86_64/media/core/updates
+    urpmi.addmedia 'Nonfree' $link_url/x86_64/media/nonfree/release
+    urpmi.addmedia --update 'Nonfree-updates' $link_url/x86_64/media/nonfree/updates
+    urpmi.addmedia 'Tainted' $link_url/x86_64/media/tainted/release
+    urpmi.addmedia --update 'Tainted-updates' $link_url/x86_64/media/tainted/updates
+    urpmi.addmedia 'Core32' $link_url/i586/media/core/release
+    urpmi.addmedia --update 'Core32-updates' $link_url/i586/media/core/updates
+#urpmi.addmedia  --distrib --mirrorlist http://mirrors.mageia.org/api/mageia.1.x86_64.list
+else
+  echo "Nieznana architektura/system"
+  exit 0
+fi

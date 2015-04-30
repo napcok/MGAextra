@@ -1,0 +1,9 @@
+#!/bin/bash
+if [ `arch` = 'i686' ]; then
+urpmi.addmedia --update --no-verify-rpm "MOPL Mga5 32bit" "http://repo.mageia.org.pl/5/i586"
+elif [ `arch` = 'x86_64' ]; then
+urpmi.addmedia --update --no-verify-rpm "MOPL Mga5 64bit" "http://repo.mageia.org.pl/5/x86_64"
+else
+  echo "Nierozpoznana architektura"
+  exit 0
+fi
