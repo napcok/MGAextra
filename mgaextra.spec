@@ -31,21 +31,23 @@ rm -rf %{buildroot}
 
 #executable
 install -d %{buildroot}%{_bindir}
-install -m0755 %{name} %{buildroot}%{_bindir}
+install -m0755 src/%{name} %{buildroot}%{_bindir}
 
 #desktop
 #install -d %%{buildroot}%%{_desktopdir}
 install -d -p %{buildroot}%{_datadir}/applications
-install -m0755 *.desktop %{buildroot}%{_datadir}/applications/
+install -m0755 src/*.desktop %{buildroot}%{_datadir}/applications/
 
 #data
 install -d %{buildroot}/%{_datadir}/%{name}
 install -d %{buildroot}/%{_datadir}/%{name}/images
 install -d %{buildroot}/%{_datadir}/%{name}/scripts
+cd src
 install -m0755 skrypt %{buildroot}/%{_datadir}/%{name}
 install -m0644 copyright splash.py skrypt.glade categories.ini categories_en.ini %{buildroot}/%{_datadir}/%{name}
 install -m0644 images/*.png %{buildroot}/%{_datadir}/%{name}/images
 install -m0744 scripts/* %{buildroot}/%{_datadir}/%{name}/scripts
+cd ..
 
 
 %files

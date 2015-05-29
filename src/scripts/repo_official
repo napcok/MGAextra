@@ -1,5 +1,5 @@
 #!/bin/bash
-link_url='ftp://fr2.rpmfind.net/linux/mageia/distrib/4'
+link_url='ftp://fr2.rpmfind.net/linux/mageia/distrib/5'
 if [ `arch` = 'i686' ]; then
 echo "dla arch. 32 bit..."
     urpmi.addmedia 'Core32' $link_url/i586/media/core/release

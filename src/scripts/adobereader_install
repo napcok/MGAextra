@@ -1,5 +1,5 @@
 #!/bin/bash
-version=9.5.4
+version=9.5.5
 adobereader_v=AdbeRdr${version}-1_i486linux_enu.bin
 if [ `arch` = 'i686' ]; then
   urpmi libxml2_2 libgdk_pixbuf2.0_0 libgtk+-x11-2.0_0
