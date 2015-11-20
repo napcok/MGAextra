@@ -83,10 +83,10 @@ def on_btnCategoriesInfo_clicked(widget):
   about.set_license(open(copyrightFile).read())
   about.set_website_label('Mageia.Org.PL')
   gtk.about_dialog_set_url_hook(lambda url, data=None: url)
-  about.set_website('http://www.mageia.org.pl')
+  about.set_website('http://mageia.org.pl')
   about.set_authors(['Przygotowali: napcok oraz m123456',
     'http://mageia.org.pl/', 'na podstawie Eve Install Roya Alayna','\n','Podziękowania dla dzonsona za udostępnienie logo', 'oraz użytkowników forum Mageia.Org.PL'])
-  about.set_version('5.0rc')
+  about.set_version('5.0')
   about.run()
   about.destroy()
 
